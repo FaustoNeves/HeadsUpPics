@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/main_background"
-    tools:context=".ui.fragment.LoginFragment">
+    tools:context=".ui.fragment.CreateAccountFragment">
 
     <TextView
         android:id="@+id/textView"
@@ -55,10 +55,13 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="50dp"
+                android:layout_marginEnd="50dp"
                 android:fontFamily="@font/maven_pro"
-                android:text="@string/login"
+                android:text="@string/create_account"
+                android:textAlignment="center"
                 android:textColor="@color/black"
                 android:textSize="36sp"
                 app:layout_constraintBottom_toTopOf="@+id/emailField"
@@ -79,7 +82,7 @@
                 app:boxStrokeColor="@color/black"
                 app:layout_constraintBottom_toTopOf="@+id/passwordField"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="1.0">
@@ -98,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="25sp"
                 android:layout_marginEnd="25sp"
-                android:layout_marginBottom="164dp"
+                android:layout_marginBottom="168dp"
                 android:hint="@string/password"
                 android:textColorHint="@color/grey"
                 app:boxStrokeColor="@color/black"
@@ -114,21 +117,6 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/createAccountText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/maven_pro"
-                android:text="@string/create_account"
-                android:textAlignment="center"
-                android:textColor="@color/grey"
-                app:layout_constraintBottom_toTopOf="@+id/loginButton"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.837"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/passwordField"
-                app:layout_constraintVertical_bias="0.434" />
-
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/loginButton"
                 android:layout_width="match_parent"
@@ -136,7 +124,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:background="@drawable/main_background"
-                android:text="@string/login"
+                android:text="@string/register"
                 android:textAllCaps="false"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -183,5 +171,6 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.05" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
