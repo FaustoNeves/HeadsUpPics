@@ -86,6 +86,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/emailFieldEdit"
+                    android:textColor="@color/black"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
@@ -109,6 +110,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/passwordFieldEdit"
+                    android:textColor="@color/black"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
@@ -122,7 +124,7 @@
                 android:text="@string/create_account"
                 android:textAlignment="center"
                 android:textColor="@color/grey"
-                app:layout_constraintBottom_toTopOf="@+id/loginButton"
+                app:layout_constraintBottom_toTopOf="@+id/registerButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.837"
                 app:layout_constraintStart_toStartOf="parent"
@@ -130,7 +132,7 @@
                 app:layout_constraintVertical_bias="0.434" />
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/loginButton"
+                android:id="@+id/registerButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
