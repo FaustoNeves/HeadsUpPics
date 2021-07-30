@@ -1,11 +1,12 @@
 <resources>
     <string name="app_name">Heads Up Pics</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="heads_up_pics">Heads UP</string>
+    <string name="heads_up">Heads UP</string>
     <string name="pics">Pics</string>
     <string name="email">email</string>
     <string name="password">password</string>
     <string name="login">Login</string>
     <string name="register">Register</string>
     <string name="create_account">Create account</string>
+    <string name="upload_pic">Upload Pic</string>
 </resources>

@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/maven_pro"
-        android:text="@string/heads_up_pics"
+        android:text="@string/heads_up"
         android:textColor="@color/white"
         android:textSize="60sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -76,6 +76,7 @@
                 android:layout_marginEnd="25sp"
                 android:hint="@string/email"
                 android:textColorHint="@color/grey"
+                app:hintTextColor="@color/black"
                 app:boxStrokeColor="@color/black"
                 app:layout_constraintBottom_toTopOf="@+id/passwordField"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -102,6 +103,7 @@
                 android:layout_marginBottom="164dp"
                 android:hint="@string/password"
                 android:textColorHint="@color/grey"
+                app:hintTextColor="@color/black"
                 app:boxStrokeColor="@color/black"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -111,6 +113,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/passwordFieldEdit"
                     android:textColor="@color/black"
+                    android:inputType="textPassword"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 

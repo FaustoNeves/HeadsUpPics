@@ -44,18 +44,26 @@ class LoginFragment : Fragment() {
         loginButton.setOnClickListener {
             val userEmail: String = userEmailText!!.text.toString()
             val userPassword: String = userPasswordText!!.text.toString()
-            FirebaseAuth.getInstance().signInWithEmailAndPassword(userEmail, userPassword)
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToPictureFragment())
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "Wrong email and/or wrong password, $it",
-                            Toast.LENGTH_SHORT
-                        ).show()
+            if ((userEmail!!.length < 5) || (userPassword!!.length < 5)) {
+                Toast.makeText(
+                    requireContext(),
+                    "Email and password must have 6 characters at least",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                FirebaseAuth.getInstance().signInWithEmailAndPassword(userEmail, userPassword)
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToPictureFragment())
+                        } else {
+                            Toast.makeText(
+                                requireContext(),
+                                "Wrong email and/or wrong password",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                }
+            }
         }
     }
 }

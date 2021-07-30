@@ -16,8 +16,8 @@ class CreateAccountFragment : Fragment() {
 
     lateinit var emailText: TextInputEditText
     lateinit var passwordText: TextInputEditText
-    lateinit var userEmail: String
-    lateinit var userPassword: String
+    private var userEmail: String? = null
+    private var userPassword: String? = null
     lateinit var registerButton: Button
 
     override fun onCreateView(
@@ -37,18 +37,32 @@ class CreateAccountFragment : Fragment() {
         registerButton.setOnClickListener {
             userEmail = emailText.text.toString()
             userPassword = passwordText.text.toString()
-            FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail, userPassword)
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        Toast.makeText(
-                            requireContext(),
-                            "Successfuly registered $it",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
+            if ((userEmail!!.length < 5) || (userPassword!!.length < 5)) {
+                Toast.makeText(
+                    requireContext(),
+                    "Email and password must have 6 characters at least",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                FirebaseAuth.getInstance()
+                    .createUserWithEmailAndPassword(userEmail!!, userPassword!!)
+                    .addOnCompleteListener {
+                        val firebaseUser: FirebaseUser = it.result!!.user!!
+                        val response = firebaseUser.getIdToken(false)
+                        val tokenResponse = response.result
+                        val token = tokenResponse!!.token
+                        if (it.isSuccessful) {
+                            Toast.makeText(
+                                requireContext(),
+                                "token $token",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                        }
                     }
-                    val firebaseUser: FirebaseUser = it.result!!.user!!
-                }
+            }
+            emailText.setText("")
+            passwordText.setText("")
         }
     }
 }
