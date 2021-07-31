@@ -35,5 +35,18 @@
         android:id="@+id/pictureFragment"
         android:name="br.com.fausto.headsuppics.ui.fragment.PictureFragment"
         android:label="fragment_picture"
-        tools:layout="@layout/fragment_picture" />
+        tools:layout="@layout/fragment_picture" >
+        <action
+            android:id="@+id/action_pictureFragment_to_galleryFragment"
+            app:destination="@id/galleryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/galleryFragment"
+        android:name="br.com.fausto.headsuppics.ui.fragment.GalleryFragment"
+        android:label="fragment_gallery"
+        tools:layout="@layout/fragment_gallery" >
+        <action
+            android:id="@+id/action_galleryFragment_to_pictureFragment"
+            app:destination="@id/pictureFragment" />
+    </fragment>
 </navigation>

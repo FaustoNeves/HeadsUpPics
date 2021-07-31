@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -19,6 +20,7 @@ class LoginFragment : Fragment() {
     private lateinit var loginButton: Button
     private var userEmailText: TextInputEditText? = null
     private var userPasswordText: TextInputEditText? = null
+    private lateinit var loginProgressBar: ProgressBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,6 +36,7 @@ class LoginFragment : Fragment() {
         loginButton = requireView().findViewById(R.id.registerButton)
         userEmailText = requireView().findViewById(R.id.emailFieldEdit)
         userPasswordText = requireView().findViewById(R.id.passwordFieldEdit)
+        loginProgressBar = requireView().findViewById(R.id.loginProgressBar)
 
         createAccountText.setOnClickListener {
             findNavController().navigate(
@@ -44,18 +47,21 @@ class LoginFragment : Fragment() {
         loginButton.setOnClickListener {
             val userEmail: String = userEmailText!!.text.toString()
             val userPassword: String = userPasswordText!!.text.toString()
-            if ((userEmail!!.length < 5) || (userPassword!!.length < 5)) {
+            if ((userEmail.length < 5) || (userPassword.length < 5)) {
                 Toast.makeText(
                     requireContext(),
                     "Email and password must have 6 characters at least",
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
+                loginProgressBar.visibility = View.VISIBLE
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(userEmail, userPassword)
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
+                            loginProgressBar.visibility = View.INVISIBLE
                             findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToPictureFragment())
                         } else {
+                            loginProgressBar.visibility = View.INVISIBLE
                             Toast.makeText(
                                 requireContext(),
                                 "Wrong email and/or wrong password",

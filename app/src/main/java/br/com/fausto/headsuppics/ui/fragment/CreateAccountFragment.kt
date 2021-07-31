@@ -5,12 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import br.com.fausto.headsuppics.R
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CreateAccountFragment : Fragment() {
 
@@ -19,6 +23,7 @@ class CreateAccountFragment : Fragment() {
     private var userEmail: String? = null
     private var userPassword: String? = null
     lateinit var registerButton: Button
+    private lateinit var loginProgressBar: ProgressBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,8 +37,9 @@ class CreateAccountFragment : Fragment() {
 
         emailText = requireView().findViewById(R.id.emailFieldEdit)
         passwordText = requireView().findViewById(R.id.passwordFieldEdit)
-
+        loginProgressBar = requireView().findViewById(R.id.loginProgressBar)
         registerButton = requireView().findViewById(R.id.registerButton)
+
         registerButton.setOnClickListener {
             userEmail = emailText.text.toString()
             userPassword = passwordText.text.toString()
@@ -44,25 +50,37 @@ class CreateAccountFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-                FirebaseAuth.getInstance()
-                    .createUserWithEmailAndPassword(userEmail!!, userPassword!!)
-                    .addOnCompleteListener {
-                        val firebaseUser: FirebaseUser = it.result!!.user!!
-                        val response = firebaseUser.getIdToken(false)
-                        val tokenResponse = response.result
-                        val token = tokenResponse!!.token
-                        if (it.isSuccessful) {
-                            Toast.makeText(
-                                requireContext(),
-                                "token $token",
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
+                loginProgressBar.visibility = View.VISIBLE
+                CoroutineScope(Dispatchers.Main).launch {
+                    FirebaseAuth.getInstance()
+                        .createUserWithEmailAndPassword(userEmail!!, userPassword!!)
+                        .addOnCompleteListener {
+                            try {
+                                val firebaseUser: FirebaseUser = it.result!!.user!!
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    if (it.isSuccessful) {
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Successfully registered",
+                                            Toast.LENGTH_SHORT
+                                        )
+                                            .show()
+                                    }
+                                }
+                            } catch (exception: Exception) {
+                                Toast.makeText(
+                                    requireContext(),
+                                    exception.cause!!.message,
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                            loginProgressBar.visibility = View.INVISIBLE
                         }
-                    }
+                    emailText.setText("")
+                    passwordText.setText("")
+                }
             }
-            emailText.setText("")
-            passwordText.setText("")
         }
     }
 }

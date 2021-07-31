@@ -1,16 +1,19 @@
 package br.com.fausto.headsuppics.ui.fragment
 
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import br.com.fausto.headsuppics.R
+import br.com.fausto.headsuppics.ui.adapter.ImageAdapter
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
@@ -21,15 +24,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-private const val REQUEST_CODE_IMAGE_PICK = 0
-
 class PictureFragment : Fragment() {
 
-    var currentFilePath: Uri? = null
-    var imageRef = Firebase.storage.reference
-    lateinit var uploadButton: ExtendedFloatingActionButton
-    lateinit var imageTest: ImageView
-    var token: String? = null
+    private var imageRef = Firebase.storage.reference
+    private lateinit var uploadButton: ExtendedFloatingActionButton
+    private lateinit var imageTest: ImageView
+    private lateinit var downloadButton: Button
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var userEmail: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,46 +44,87 @@ class PictureFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val firebaseUser = FirebaseAuth.getInstance().currentUser
-        firebaseUser!!.getIdToken(true).addOnCompleteListener {
-            token = it.result!!.token
-        }
+        getImagesFromFirestore()
 
+        userEmail = firebaseUser!!.email!!
         uploadButton = requireView().findViewById(R.id.uploadPicButton)
         imageTest = requireView().findViewById(R.id.imageTest)
+        downloadButton = requireView().findViewById(R.id.downloadButton)
+        recyclerView = requireView().findViewById(R.id.recyclerView)
 
         uploadButton.setOnClickListener {
-            val randomName = java.util.UUID.randomUUID().toString()
-            uploadImageToFirestore("$token|$randomName")
+            findNavController().navigate(PictureFragmentDirections.actionPictureFragmentToGalleryFragment())
         }
-        imageTest.setOnClickListener {
-            pickImage()
-        }
-    }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        FirebaseAuth.getInstance().signOut()
-    }
-
-    private fun pickImage() {
-        Intent(Intent.ACTION_GET_CONTENT).also {
-            it.type = "image/*"
-            startActivityForResult(it, REQUEST_CODE_IMAGE_PICK)
+        downloadButton.setOnClickListener {
+//            val randomName = java.util.UUID.randomUUID().toString()
+//            downloadImageFromFirestore("imagem_teste")
         }
     }
 
-    private fun uploadImageToFirestore(filename: String) {
+//    private fun downloadImageFromFirestore(filename: String) {
+//        CoroutineScope(Dispatchers.IO).launch {
+//            try {
+//                val maxDownloadSize = 5L * 1024 * 2014
+//                val bytes = imageRef.child("images/$filename").getBytes(maxDownloadSize).await()
+//                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+//                withContext(Dispatchers.Main) {
+//                    imageTest.setImageBitmap(bitmap)
+//                }
+//            } catch (exception: Exception) {
+//                withContext(Dispatchers.Main) {
+//                    Toast.makeText(requireContext(), exception.message, Toast.LENGTH_SHORT)
+//                        .show()
+//                }
+//            }
+//        }
+//    }
+
+    private fun getImagesFromFirestore() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                currentFilePath.let {
-                    imageRef.child("images/$filename").putFile(it!!).await()
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
+                val images = imageRef.child("images/$userEmail/").listAll().await()
+                val imagesUrls = mutableListOf<String>()
+                Log.e("contagem", images.items.size.toString())
+                for (image in images.items) {
+                    val url = image.downloadUrl.await()
+                    imagesUrls.add(url.toString())
+                }
+                withContext(Dispatchers.Main) {
+                    recyclerView.run {
+                        adapter = ImageAdapter(imagesUrls) {
+                            itemListClick(it)
+                        }
+                        layoutManager = LinearLayoutManager(
                             requireContext(),
-                            "Successfully uploaded",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                            LinearLayoutManager.VERTICAL,
+                            false
+                        )
                     }
+                }
+            } catch (exception: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), exception.message, Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+    }
+
+    private fun itemListClick(url: String) {
+        Toast.makeText(requireContext(), url, Toast.LENGTH_SHORT).show()
+        Log.e("image url", url)
+        deleteImage(url)
+    }
+
+    private fun deleteImage(filename: String) {
+        val imageUrLRef = Firebase.storage.getReferenceFromUrl(filename)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                imageUrLRef.delete().await()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Successfully deleted", Toast.LENGTH_SHORT)
+                        .show()
                 }
             } catch (exception: Exception) {
                 withContext(Dispatchers.Main) {
@@ -91,14 +134,8 @@ class PictureFragment : Fragment() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == Activity.RESULT_OK) {
-            data?.data?.let {
-                currentFilePath = it
-                imageTest.setImageURI(it)
-            }
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        FirebaseAuth.getInstance().signOut()
     }
 }

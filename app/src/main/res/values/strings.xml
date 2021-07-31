@@ -9,4 +9,6 @@
     <string name="register">Register</string>
     <string name="create_account">Create account</string>
     <string name="upload_pic">Upload Pic</string>
+    <string name="upload">Upload</string>
+    <string name="back">Back</string>
 </resources>

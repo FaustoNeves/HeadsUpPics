@@ -23,7 +23,7 @@ class IntroFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         runBlocking {
-            delay(3000)
+            delay(500)
             findNavController().navigate(
                 IntroFragmentDirections.actionIntroFragmentToLoginFragment()
             )
