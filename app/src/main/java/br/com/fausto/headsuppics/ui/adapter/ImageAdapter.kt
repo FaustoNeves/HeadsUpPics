@@ -10,15 +10,23 @@ import com.google.android.material.button.MaterialButton
 
 class ImageAdapter(
     private val urls: List<String>,
-    private val deleteClickListener: (String) -> Unit
+    private val deleteClickListener: (String) -> Unit,
+    private val downloadClickListener: (String) -> Unit
 ) :
     RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
 
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bindView(url: String, clickListener: (String) -> Unit) {
+        fun bindView(
+            url: String,
+            deleteClickListener: (String) -> Unit,
+            downloadClickListener: (String) -> Unit
+        ) {
             Glide.with(itemView).load(url).into(itemView.findViewById(R.id.ivImage))
             itemView.findViewById<MaterialButton>(R.id.deleteButton).setOnClickListener {
-                clickListener(url)
+                deleteClickListener(url)
+            }
+            itemView.findViewById<MaterialButton>(R.id.downloadButton).setOnClickListener {
+                downloadClickListener(url)
             }
         }
     }
@@ -34,7 +42,7 @@ class ImageAdapter(
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        holder.bindView(urls[position], deleteClickListener)
+        holder.bindView(urls[position], deleteClickListener, downloadClickListener)
     }
 
     override fun getItemCount() = urls.size

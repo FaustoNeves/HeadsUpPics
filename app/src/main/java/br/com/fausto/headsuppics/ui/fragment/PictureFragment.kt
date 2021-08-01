@@ -1,6 +1,8 @@
 package br.com.fausto.headsuppics.ui.fragment
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,31 +59,9 @@ class PictureFragment : Fragment() {
         }
     }
 
-//    private fun downloadImageFromFirestore(filename: String) {
-//        CoroutineScope(Dispatchers.IO).launch {
-//            try {
-//                val maxDownloadSize = 5L * 1024 * 2014
-//                val bytes = imageRef.child("images/$filename").getBytes(maxDownloadSize).await()
-//                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-//                withContext(Dispatchers.Main) {
-//                    imageTest.setImageBitmap(bitmap)
-//                }
-//            } catch (exception: Exception) {
-//                withContext(Dispatchers.Main) {
-//                    Toast.makeText(requireContext(), exception.message, Toast.LENGTH_SHORT)
-//                        .show()
-//                }
-//            }
-//        }
-//    }
-
     private fun getImagesFromFirestore() {
         imagesUrls!!.clear()
         CoroutineScope(Dispatchers.IO).launch {
-//            requireActivity().window.setFlags(
-//                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-//                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-//            )
             try {
                 val images = imageRef.child("images/$userEmail/").listAll().await()
                 for (image in images.items) {
@@ -89,22 +69,41 @@ class PictureFragment : Fragment() {
                     imagesUrls!!.add(url.toString())
                 }
                 setRecyclerView(imagesUrls!!)
-//                requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+            } catch (exception: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), exception.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun itemDeleteListClick(url: String) {
+        deleteImage(url)
+    }
+
+    private fun itemDownloadListClick(url: String) {
+        downloadImage(url)
+    }
+
+    private fun downloadImage(filename: String) {
+        Log.e("download filename", filename)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                imageRef.downloadUrl
+                val maxDownloadSize = 5L * 1024 * 2014
+                val bytes = imageRef.child("images/$filename").getBytes(maxDownloadSize).await()
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             } catch (exception: Exception) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(requireContext(), exception.message, Toast.LENGTH_SHORT)
                         .show()
                 }
-//                requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
             }
         }
     }
 
-    private fun itemListClick(url: String) {
-        deleteImage(url)
-    }
-
     private fun deleteImage(filename: String) {
+        Log.e("delete filename", filename)
         val imageUrLRef = Firebase.storage.getReferenceFromUrl(filename)
         imagesUrls!!.remove(filename)
         CoroutineScope(Dispatchers.IO).launch {
@@ -126,9 +125,11 @@ class PictureFragment : Fragment() {
     private suspend fun setRecyclerView(UrlList: List<String>) {
         withContext(Dispatchers.Main) {
             recyclerView.run {
-                imageAdapter = ImageAdapter(UrlList) {
-                    itemListClick(it)
-                }
+                imageAdapter = ImageAdapter(UrlList, {
+                    itemDeleteListClick(it)
+                }, {
+                    itemDownloadListClick(it)
+                })
                 adapter = imageAdapter
                 layoutManager = LinearLayoutManager(
                     requireContext(),

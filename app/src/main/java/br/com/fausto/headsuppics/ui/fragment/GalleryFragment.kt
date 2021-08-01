@@ -32,7 +32,8 @@ class GalleryFragment : Fragment() {
     private lateinit var imageToUpload: ImageView
     private lateinit var userEmail: String
     lateinit var uploadButton: Button
-    lateinit var cancelButton: Button
+    private lateinit var cancelButton: Button
+    lateinit var openGallery: Button
     private lateinit var galleryProgressBar: ProgressBar
 
     override fun onCreateView(
@@ -49,14 +50,12 @@ class GalleryFragment : Fragment() {
         cancelButton = requireView().findViewById(R.id.cancelButton)
         imageToUpload = requireView().findViewById(R.id.imageToUpload)
         galleryProgressBar = requireView().findViewById(R.id.galleryProgressBar)
+        openGallery = requireView().findViewById(R.id.openMediaGallery)
 
         val firebaseUser = FirebaseAuth.getInstance().currentUser
         userEmail = firebaseUser!!.email!!
 
-        Intent(Intent.ACTION_GET_CONTENT).also {
-            it.type = "image/*"
-            startActivityForResult(it, REQUEST_CODE_IMAGE_PICK)
-        }
+        openMediaGallery()
 
         uploadButton.setOnClickListener {
             val randomName = java.util.UUID.randomUUID().toString()
@@ -65,6 +64,17 @@ class GalleryFragment : Fragment() {
 
         cancelButton.setOnClickListener {
             findNavController().navigate(GalleryFragmentDirections.actionGalleryFragmentToPictureFragment())
+        }
+
+        openGallery.setOnClickListener {
+            openMediaGallery()
+        }
+    }
+
+    private fun openMediaGallery() {
+        Intent(Intent.ACTION_GET_CONTENT).also {
+            it.type = "image/*"
+            startActivityForResult(it, REQUEST_CODE_IMAGE_PICK)
         }
     }
 
