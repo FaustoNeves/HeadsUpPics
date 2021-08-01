@@ -11,4 +11,6 @@
     <string name="upload_pic">Upload Pic</string>
     <string name="upload">Upload</string>
     <string name="back">Back</string>
+    <string name="delete">delete</string>
+    <string name="download">download</string>
 </resources>

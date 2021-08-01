@@ -3,18 +3,21 @@ package br.com.fausto.headsuppics.ui.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import br.com.fausto.headsuppics.R
 import com.bumptech.glide.Glide
+import com.google.android.material.button.MaterialButton
 
-class ImageAdapter(private val urls: List<String>, private val clickListener: (String) -> Unit) :
+class ImageAdapter(
+    private val urls: List<String>,
+    private val deleteClickListener: (String) -> Unit
+) :
     RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
 
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bindView(url: String, clickListener: (String) -> Unit) {
             Glide.with(itemView).load(url).into(itemView.findViewById(R.id.ivImage))
-            itemView.findViewById<ImageView>(R.id.ivImage).setOnClickListener {
+            itemView.findViewById<MaterialButton>(R.id.deleteButton).setOnClickListener {
                 clickListener(url)
             }
         }
@@ -31,7 +34,7 @@ class ImageAdapter(private val urls: List<String>, private val clickListener: (S
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        holder.bindView(urls[position], clickListener)
+        holder.bindView(urls[position], deleteClickListener)
     }
 
     override fun getItemCount() = urls.size

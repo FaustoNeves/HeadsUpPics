@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -54,6 +55,10 @@ class LoginFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
+                requireActivity().window.setFlags(
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                )
                 loginProgressBar.visibility = View.VISIBLE
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(userEmail, userPassword)
                     .addOnCompleteListener {
@@ -68,6 +73,7 @@ class LoginFragment : Fragment() {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+                        requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                     }
             }
         }

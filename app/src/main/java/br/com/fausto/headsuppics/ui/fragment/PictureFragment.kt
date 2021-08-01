@@ -1,12 +1,9 @@
 package br.com.fausto.headsuppics.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -28,10 +25,11 @@ class PictureFragment : Fragment() {
 
     private var imageRef = Firebase.storage.reference
     private lateinit var uploadButton: ExtendedFloatingActionButton
-    private lateinit var imageTest: ImageView
-    private lateinit var downloadButton: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var userEmail: String
+    var imagesUrls: MutableList<String>? = mutableListOf()
+    private val firebaseUser = FirebaseAuth.getInstance().currentUser
+    lateinit var imageAdapter: ImageAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,22 +41,19 @@ class PictureFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val firebaseUser = FirebaseAuth.getInstance().currentUser
-        getImagesFromFirestore()
+        userEmail = firebaseUser!!.email!!
+    }
 
+    override fun onResume() {
+        super.onResume()
+
+        getImagesFromFirestore()
         userEmail = firebaseUser!!.email!!
         uploadButton = requireView().findViewById(R.id.uploadPicButton)
-        imageTest = requireView().findViewById(R.id.imageTest)
-        downloadButton = requireView().findViewById(R.id.downloadButton)
         recyclerView = requireView().findViewById(R.id.recyclerView)
 
         uploadButton.setOnClickListener {
             findNavController().navigate(PictureFragmentDirections.actionPictureFragmentToGalleryFragment())
-        }
-
-        downloadButton.setOnClickListener {
-//            val randomName = java.util.UUID.randomUUID().toString()
-//            downloadImageFromFirestore("imagem_teste")
         }
     }
 
@@ -81,50 +76,44 @@ class PictureFragment : Fragment() {
 //    }
 
     private fun getImagesFromFirestore() {
+        imagesUrls!!.clear()
         CoroutineScope(Dispatchers.IO).launch {
+//            requireActivity().window.setFlags(
+//                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+//                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+//            )
             try {
                 val images = imageRef.child("images/$userEmail/").listAll().await()
-                val imagesUrls = mutableListOf<String>()
-                Log.e("contagem", images.items.size.toString())
                 for (image in images.items) {
                     val url = image.downloadUrl.await()
-                    imagesUrls.add(url.toString())
+                    imagesUrls!!.add(url.toString())
                 }
-                withContext(Dispatchers.Main) {
-                    recyclerView.run {
-                        adapter = ImageAdapter(imagesUrls) {
-                            itemListClick(it)
-                        }
-                        layoutManager = LinearLayoutManager(
-                            requireContext(),
-                            LinearLayoutManager.VERTICAL,
-                            false
-                        )
-                    }
-                }
+                setRecyclerView(imagesUrls!!)
+//                requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
             } catch (exception: Exception) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(requireContext(), exception.message, Toast.LENGTH_SHORT)
                         .show()
                 }
+//                requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
             }
         }
     }
 
     private fun itemListClick(url: String) {
-        Toast.makeText(requireContext(), url, Toast.LENGTH_SHORT).show()
-        Log.e("image url", url)
         deleteImage(url)
     }
 
     private fun deleteImage(filename: String) {
         val imageUrLRef = Firebase.storage.getReferenceFromUrl(filename)
+        imagesUrls!!.remove(filename)
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 imageUrLRef.delete().await()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(requireContext(), "Successfully deleted", Toast.LENGTH_SHORT)
                         .show()
+                    getImagesFromFirestore()
                 }
             } catch (exception: Exception) {
                 withContext(Dispatchers.Main) {
@@ -134,8 +123,19 @@ class PictureFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        FirebaseAuth.getInstance().signOut()
+    private suspend fun setRecyclerView(UrlList: List<String>) {
+        withContext(Dispatchers.Main) {
+            recyclerView.run {
+                imageAdapter = ImageAdapter(UrlList) {
+                    itemListClick(it)
+                }
+                adapter = imageAdapter
+                layoutManager = LinearLayoutManager(
+                    requireContext(),
+                    LinearLayoutManager.VERTICAL,
+                    false
+                )
+            }
+        }
     }
 }
