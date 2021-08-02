@@ -1,11 +1,15 @@
 package br.com.fausto.headsuppics.ui.fragment
 
-import android.graphics.BitmapFactory
+import android.app.DownloadManager
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.CookieManager
+import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -86,24 +90,21 @@ class PictureFragment : Fragment() {
     }
 
     private fun downloadImage(filename: String) {
-        Log.e("download filename", filename)
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                imageRef.downloadUrl
-                val maxDownloadSize = 5L * 1024 * 2014
-                val bytes = imageRef.child("images/$filename").getBytes(maxDownloadSize).await()
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-            } catch (exception: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), exception.message, Toast.LENGTH_SHORT)
-                        .show()
-                }
-            }
+        val request = DownloadManager.Request(Uri.parse(filename))
+        val title = URLUtil.guessFileName(filename, null, null)
+        request.setTitle("Downloading your image")
+        val cookie = CookieManager.getInstance().getCookie(filename)
+        request.apply {
+            addRequestHeader("cookie", cookie)
+            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, title)
         }
+        val downloadManager: DownloadManager =
+            requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.enqueue(request)
     }
 
     private fun deleteImage(filename: String) {
-        Log.e("delete filename", filename)
         val imageUrLRef = Firebase.storage.getReferenceFromUrl(filename)
         imagesUrls!!.remove(filename)
         CoroutineScope(Dispatchers.IO).launch {
